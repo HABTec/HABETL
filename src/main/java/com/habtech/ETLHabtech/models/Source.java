@@ -2,6 +2,8 @@ package com.habtech.ETLHabtech.models;
 
 import jakarta.persistence.*;
 
+@Entity
+@Table(name="source")
 public class Source {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
