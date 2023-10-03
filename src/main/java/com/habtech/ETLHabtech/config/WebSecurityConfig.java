@@ -18,7 +18,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests((requests)->
                 requests.requestMatchers("/","/public/**","/assets/**").permitAll()
                         .anyRequest().authenticated()
-        ).formLogin((form)-> form.loginPage("/login").permitAll()).logout((logout)->logout.permitAll());
+        ).formLogin((form)-> form.loginPage("/login").defaultSuccessUrl("/user").permitAll()).logout((logout)->logout.permitAll());
         return http.build();
     }
 

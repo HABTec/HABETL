@@ -82,10 +82,10 @@
             </ul>
           </li>
           <li><a href="#contact">Contact</a></li>
-          <li><a href="/login ">Login</a></li>
+          <li><a href="/user ">Login</a></li>
         </ul>
         <ul sec:authorize="isAuthenticated()">
-          <li><a href="/user/">Home</a></li>
+          <li><a href="/user/">Dashboard</a></li>
           <li><a href="#"><form th:action="@{/logout}" method="post">
             <input style="background: inherit;border: none;color: inherit;" type="submit" value="Sign Out"/>
           </form></a></li>
