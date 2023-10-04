@@ -1,6 +1,9 @@
 package com.habtech.ETLHabtech.models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "destination")
@@ -19,10 +22,23 @@ public class Destination {
     private String password;
     @Column(name = "host")
     private String host;
-    @Column(name = "database")
+    @Column(name = "db")
     private String database;
 
+    @Column(name = "destination_table")
     private String table;
+
+    @Column(name="created_at")
+    @CreationTimestamp
+    private Instant createdAt;
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public Destination() {
     }
