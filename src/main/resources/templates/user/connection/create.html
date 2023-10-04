@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://thymeleaf.com" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+  <title>Dashboard - HAB-ETL</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+  <link th:replace="layout/admin-head">
+</head>
+
+<body>
+  <header id="header" th:replace="layout/header"></header>
+  <aside id="sidebar" th:replace="layout/sidebar"></aside>
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Connections</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/user">Home</a></li>
+          <li class="breadcrumb-item">Connections</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+      <div class="row">
+        <div class="col-lg-12">
+
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Create new connection</h5>
+
+              <!-- General Form Elements -->
+              <form th:action="@{/user/connection/store}" method="post">
+                <div class="row mb-3">
+                  <label for="inputText" class="col-sm-2 col-form-label">Name</label>
+                  <div class="col-sm-10">
+                    <input required id="inputText" name="name" type="text" class="form-control">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label">Source</label>
+                  <div class="col-sm-10">
+                    <select required class="form-select" name="source" aria-label="Default select">
+                      <option th:each="source:${sources}" th:value="${source.id}" th:text="${source.name}" selected></option>
+                    </select>
+                  </div>
+                </div>
+
+               <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label">Destination</label>
+                  <div class="col-sm-10">
+                    <select requried class="form-select" name="destination" aria-label="Destination select">
+                      <option th:each="destination:${destinations}" th:value="${destination.id}" th:text="${destination.name}" selected></option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label"></label>
+                  <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary">Submit Form</button>
+                  </div>
+                </div>
+
+              </form><!-- End General Form Elements -->
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" th:replace="layout/footer"></footer>
+
+</body>
+
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://thymeleaf.com" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+  <title>Dashboard - HAB-ETL</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+  <link th:replace="layout/admin-head">
+</head>
+
+<body>
+  <header id="header" th:replace="layout/header"></header>
+  <aside id="sidebar" th:replace="layout/sidebar"></aside>
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Connections</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/user">Home</a></li>
+          <li class="breadcrumb-item">Connections</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+      <div class="row">
+        <div class="col-lg-12">
+
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Create new destination</h5>
+
+              <!-- General Form Elements -->
+              <form th:action="@{/user/destination/store}" method="post">
+                <div class="row mb-3">
+                  <label for="inputText" class="col-sm-2 col-form-label">Name</label>
+                  <div class="col-sm-10">
+                    <input required id="inputText" requried name="name" type="text" class="form-control">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label">Destination Type</label>
+                  <div class="col-sm-10">
+                    <select required class="form-select" name="destinationType" aria-label="Default select">
+                      <option th:each="type,i:${destinationTypes}" th:value="${type}" th:text="${type}"></option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="inputHost" class="col-sm-2 col-form-label">Host</label>
+                  <div class="col-sm-10">
+                    <input required id="inputHost" requried name="host" type="text" class="form-control">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="inputUsername" class="col-sm-2 col-form-label">Username</label>
+                  <div class="col-sm-10">
+                    <input required id="inputUsername" requried name="username" type="text" class="form-control">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
+                  <div class="col-sm-10">
+                    <input required id="inputPassword" name="password" type="password" class="form-control">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="inputDatabase" class="col-sm-2 col-form-label">Database</label>
+                  <div class="col-sm-10">
+                    <input required id="inputDatabase" requried name="database" type="text" class="form-control">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label"></label>
+                  <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary">Submit Form</button>
+                  </div>
+                </div>
+
+              </form><!-- End General Form Elements -->
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" th:replace="layout/footer"></footer>
+
+</body>
+
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://thymeleaf.com" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Dashboard - HAB-ETL</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+    <link th:replace="layout/admin-head">
+</head>
+
+<body>
+<header id="header" th:replace="layout/header"></header>
+<aside id="sidebar" th:replace="layout/sidebar"></aside>
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>Destinations</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/user">Home</a></li>
+                <li class="breadcrumb-item">Destination</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <h5 class="card-title col-lg-6 p-4">Destinations Table</h5>
+                            <div class="col-lg-6 p-4">
+                                <a href="/user/destination/create">
+                                    <button type="button" class="btn btn-primary float-end" ><i class="bi bi-plus me-1"></i> Destination</button>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Table with stripped rows -->
+                        <table class="table datatable">
+                            <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Destination Type</th>
+                                <th scope="col">Host</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="destination:${destinations}">
+                                <th th:text="${destination.id}" scope="row">1</th>
+                                <td th:text="${destination.name}">Brandon Jacob</td>
+                                <td th:text="${destination.destinationType.toString()}">Designer</td>
+                                <td th:text="${destination.host}">28</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <!-- End Table with stripped rows -->
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</main><!-- End #main -->
+
+<!-- ======= Footer ======= -->
+<footer id="footer" th:replace="layout/footer"></footer>
+
+</body>
+
+</html>
