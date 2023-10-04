@@ -4,15 +4,15 @@ public enum SourceType {
 
     DHIS_API, POSTGRES, MYSQL, JSON, CSV;
 
-    @Override
-    public String toString() {
-        switch(this){
-            case DHIS_API -> {return "DHIS API";}
-            case CSV -> {return "Comma Separated Value(CSV)";}
-            case JSON -> {return "JSON Object";}
-            case MYSQL -> {return "MySQL Database";}
-            case POSTGRES -> {return "Postgres Database";}
-        }
-        return "";
-    }
+//    @Override
+//    public String toString() {
+//        switch(this){
+//            case DHIS_API -> {return "DHIS API";}
+//            case CSV -> {return "Comma Separated Value(CSV)";}
+//            case JSON -> {return "JSON Object";}
+//            case MYSQL -> {return "MySQL Database";}
+//            case POSTGRES -> {return "Postgres Database";}
+//        }
+//        return "";
+//    }
 }

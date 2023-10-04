@@ -17,4 +17,8 @@ public class SourceService {
     public List<Source> getAllSources(){
         return sourceRepository.findAll();
     }
+
+    public void createSource(Source source) {
+        sourceRepository.save(source);
+    }
 }
