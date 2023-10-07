@@ -1,14 +1,31 @@
 package com.habtech.ETLHabtech.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habtech.ETLHabtech.models.Connection;
-import com.habtech.ETLHabtech.services.ConnectionService;
-import com.habtech.ETLHabtech.services.DestinationService;
-import com.habtech.ETLHabtech.services.SourceService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.habtech.ETLHabtech.models.Source;
+import com.habtech.ETLHabtech.models.Stream;
+import com.habtech.ETLHabtech.models.TableColumn;
+import com.habtech.ETLHabtech.services.*;
+import jakarta.persistence.Column;
+import jakarta.transaction.Transactional;
+import jakarta.websocket.server.PathParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.springframework.http.*;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 @Controller
 @RequestMapping("/user/connection")
@@ -17,28 +34,151 @@ public class ConnectionController {
     private final DestinationService destinationService;
     private final SourceService sourceService;
 
-    public ConnectionController(ConnectionService connectionService, DestinationService destinationService, SourceService sourceService) {
+    private final StreamService streamService;
+    private final TableColumnService tableColumService;
+
+    private final Logger logger = LoggerFactory.getLogger(ConnectionController.class);
+
+    public ConnectionController(ConnectionService connectionService, DestinationService destinationService, SourceService sourceService, StreamService streamService, TableColumnService tableColumService) {
         this.connectionService = connectionService;
         this.destinationService = destinationService;
         this.sourceService = sourceService;
+        this.streamService = streamService;
+        this.tableColumService = tableColumService;
     }
 
     @GetMapping()
-    public String getAllConnection(Model model){
-        model.addAttribute("connections",connectionService.getAllConnection());
+    public String getAllConnection(Model model) {
+        model.addAttribute("connections", connectionService.getAllConnection());
         return "user/connection/index";
     }
 
     @GetMapping("create")
-    public String createConnection(Model model){
-        model.addAttribute("sources",sourceService.getAllSources());
-        model.addAttribute("destinations",destinationService.getAllDestinations());
+    public String createConnection(Model model) {
+        model.addAttribute("sources", sourceService.getAllSources());
+        model.addAttribute("destinations", destinationService.getAllDestinations());
         return "user/connection/create";
     }
 
     @PostMapping("store")
-    public String createConnection(@ModelAttribute("connection") Connection connection){
+    public String createConnection(@ModelAttribute("connection") Connection connection) {
         connectionService.createConnection(connection);
         return "redirect:/user/connection";
     }
+
+    @GetMapping("{connection_id}")
+    public String show(@PathVariable("connection_id") Long id, Model model) {
+        Connection connection = connectionService.getById(id);
+        model.addAttribute("connection", connection);
+        return "user/connection/show";
+    }
+
+    @PostMapping("{connection_id}/stream")
+    public String postStream(@PathVariable("connection_id") Long connectionId, @ModelAttribute("stream") Stream stream, RedirectAttributes redirectAttributes) {
+        try {
+            // try sending request to the end point
+            Connection connection = connectionService.getById(connectionId);
+            Source source = connection.getSource();
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBasicAuth(source.getUsername(), source.getPassword());
+            HttpEntity<HttpHeaders> request = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(stream.getURL(), HttpMethod.GET, request, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+
+//            redirectAttributes.addFlashAttribute("result", response.getBody());
+
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    JsonNode root = mapper.readTree(response.getBody());
+                    JsonNode object = root.at(stream.getResultPath());
+                    stream.setResultObject(object.toString());
+                    streamService.save(stream);
+                    if (object.isArray())
+                        redirectAttributes.addFlashAttribute("result", object.get(0).toString());
+                    else {
+                        Iterator<String> keyIterator = object.fieldNames();
+                        keyIterator.forEachRemaining(e -> {
+                            TableColumn column = new TableColumn(e, e, false, "text", "/", stream);
+                            tableColumService.save(column);
+                        });
+                        redirectAttributes.addFlashAttribute("result", object.toString());
+                        return "redirect:/user/connection/" + connectionId + "/stream/" + stream.getId();
+                    }
+                    redirectAttributes.addFlashAttribute("message", "Stream created!");
+
+                } catch (JsonProcessingException e) {
+                    redirectAttributes.addFlashAttribute("message", "Invalid response message!");
+                }
+
+//        }else{
+//            redirectAttributes.addAttribute("stream",stream);
+//            redirectAttributes.addAttribute("error",response.getStatusCode());
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("result", "Error encountered! " + e.toString());
+        }
+        return "redirect:/user/connection/" + connectionId;
+    }
+
+    @GetMapping("{connection_id}/stream/{stream_id}")
+    public String showStream(@PathVariable("connection_id") Long connection_id, @PathVariable("stream_id") long stream_id, Model model) {
+        model.addAttribute("stream", streamService.getById(stream_id));
+        return "user/stream/show";
+    }
+    @PostMapping("{connection_id}/stream/{stream_id}/update")
+    @Transactional
+    public String updateStream(@PathVariable("connection_id") Long connection_id, @PathVariable("stream_id") long stream_id, @ModelAttribute("stream") Stream streamTemp) {
+        Stream stream = streamService.getById(stream_id);
+        streamTemp.setConnection(stream.getConnection());
+        streamTemp.setTableColumns(stream.getTableColumns());
+        streamTemp.setResultObject(stream.getResultObject());
+        streamService.save(streamTemp);
+        logger.debug("from update path "+ streamTemp.toString());
+        return "redirect:/user/connection/"+connection_id+"/stream/"+stream_id;
+    }
+
+    @GetMapping("{connection_id}/stream/{stream_id}/delete")
+    public String deleteStream(@PathVariable("stream_id") Long id, @PathVariable("connection_id") Long connectionId) {
+        streamService.delete(id);
+        return "redirect:/user/connection/" + connectionId;
+    }
+
+//    @GetMapping("{connection_id}/stream/{stream_id}/columns")
+//    public String indexColumn(@PathVariable("stream_id") long id, Model model) {
+//        Stream stream = streamService.getById(id);
+//        model.addAttribute("stream", stream);
+//        return "user/column/index";
+//    }
+
+    @PostMapping("/{connection_id}/stream/{stream_id}/columns")
+    public String updateColumns(@PathVariable("stream_id") long stream_id,
+                                @PathVariable("connection_id") long connection_id,
+                                @RequestParam("id[]") long[] ids,
+                                @RequestParam("name[]") String[] names,
+                                @RequestParam("targetName[]") String[] targetNames,
+                                @RequestParam("dataType[]") String[] dataTypes,
+                                @RequestParam("path[]") String[] paths,
+                                @RequestParam(value = "disabled[]", required = false) Long[] disabled,
+                                RedirectAttributes redirectAttributes
+    ){
+        try {
+            Stream stream = streamService.getById(stream_id);
+            ArrayList<TableColumn> tableColumns = new ArrayList<>();
+            logger.debug(ids.length+" length of ids");
+            for (int i = 0; i < ids.length; i++) {
+                int finalI = i;
+                logger.debug("disabled for "+i+" "+Arrays.stream(disabled).anyMatch(e->ids[finalI]==e));
+                tableColumns.add(new TableColumn(ids[i], names[i], targetNames[i], !Arrays.stream(disabled).anyMatch(e->ids[finalI]==e), dataTypes[i], paths[i], stream));
+            }
+            tableColumService.saveAll(tableColumns);
+            redirectAttributes.addFlashAttribute("message", "Column information successfully updated");
+        }catch (Exception e){
+            redirectAttributes.addFlashAttribute("message","something went wrong");
+            redirectAttributes.addFlashAttribute("error",e.toString());
+        }
+        return "redirect:/user/connection/"+connection_id+"/stream/"+stream_id;
+    }
+
 }
