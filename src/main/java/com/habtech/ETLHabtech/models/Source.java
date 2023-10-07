@@ -20,13 +20,11 @@ public class Source {
     private String password;
     private String host;
 
-    @Column(name = "db")
+    @jakarta.persistence.Column(name = "db")
     private String database;
 
-    @Column(name = "source_table")
-    private String table;
 
-    @Column(name="created_at")
+    @jakarta.persistence.Column(name="created_at")
     @CreationTimestamp
     private Instant createdAt;
 
@@ -36,14 +34,6 @@ public class Source {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public String getTable() {
-        return table;
-    }
-
-    public void setTable(String table) {
-        this.table = table;
     }
 
     public long getId() {

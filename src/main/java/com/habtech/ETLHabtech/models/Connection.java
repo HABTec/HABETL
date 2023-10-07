@@ -3,9 +3,8 @@ package com.habtech.ETLHabtech.models;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "connection")
@@ -27,13 +26,24 @@ public class Connection {
     @CreationTimestamp
     private Instant createdAt;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name="source_id",referencedColumnName = "id", nullable = false)
     private Source source;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "destination_id", referencedColumnName = "id",nullable = false)
     private Destination destination;
+
+    @OneToMany(mappedBy = "connection",orphanRemoval = true,cascade = CascadeType.REMOVE)
+    private List<Stream> streams;
+
+    public List<Stream> getStreams() {
+        return streams;
+    }
+
+    public void setStreams(List<Stream> streams) {
+        this.streams = streams;
+    }
 
     public Connection(String name, Source source, Destination destination) {
         this.name = name;
