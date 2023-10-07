@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://thymeleaf.com" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+  <title>Dashboard - HAB-ETL</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+  <link th:replace="layout/admin-head">
+</head>
+
+<body>
+<header id="header" th:replace="layout/header"></header>
+<aside id="sidebar" th:replace="layout/sidebar"></aside>
+<main id="main" class="main">
+
+  <div class="pagetitle">
+    <h1>Connection Detail</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/user">Home</a></li>
+        <li class="breadcrumb-item"><a href="/user/connection">Connections</a></li>
+        <li class="breadcrumb-item" th:text="${connection.name}" >Name of the Connection</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title" th:text="${connection.name}">Connection name</h5>
+            <!-- Bordered Tabs -->
+            <ul class="nav nav-tabs nav-tabs-bordered" id="borderedTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#bordered-home" type="button" role="tab" aria-controls="home" aria-selected="true">Stream</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profile-history" data-bs-toggle="tab" data-bs-target="#bordered-history" type="button" role="tab" aria-controls="history" aria-selected="false">Job History</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="mapping-tab" data-bs-toggle="tab" data-bs-target="#bordered-mapping" type="button" role="tab" aria-controls="mapping" aria-selected="false">Mapping</button>
+              </li>
+            </ul>
+            <div class="tab-content pt-2" id="borderedTabContent">
+              <div class="tab-pane fade show active" id="bordered-home" role="tabpanel" aria-labelledby="home-tab">
+                <!--   new stream creating form  -->
+                <form th:action="@{'/user/connection/'+${connection.id}+'/stream'}" method="post">
+                  <div class="accordion accordion-flush" id="accordionFlushExample">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="flush-headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                          <div class="col-form-label">Create new stream</div>
+                        </button>
+                      </h2>
+                      <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                        <div class="accordion-body">
+                          <div class="row mb-3 col-6">
+                            <div class="col-sm-10">
+                              <div class="form-floating mb-3">
+                                <input name="name" type="text" class="form-control" id="floatingInput" placeholder="name of the stream">
+                                <input type="hidden" name="connection" th:value="${connection.id}">
+                                <label for="floatingInput">Stream name</label>
+                              </div>
+                              <div class="form-floating mb-3">
+                                <input name="targetName" type="text" class="form-control" id="floatingTargetName" placeholder="users">
+                                <label for="floatingTargetName">Target table name</label>
+                              </div>
+                              <div class="form-floating mb-3">
+                                <input name="resourceURI" type="text" class="form-control" id="floatingResourceURI" placeholder="/users">
+                                <label for="floatingResourceURI">Resource URI</label>
+                              </div>
+                              <div class="form-floating mb-3">
+                                <input name="resultPath" type="text" class="form-control" id="floatingResultPath" placeholder="result.users">
+                                <label for="floatingResultPath">Result Path</label>
+                              </div>
+                              <div class="text-left">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="reset" class="btn btn-secondary">Reset</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <code th:text="${result}"></code>
+                  <table class="table table-hover">
+                    <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>URI</th>
+                      <th>Result Path</th>
+                      <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="stream:${connection.streams}">
+                      <td><a th:text="${stream.id}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}" ></a></td>
+                      <td><a th:text="${stream.name}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}" ></a> </td>
+                      <td><a th:text="${stream.getURL()}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}"></a></td>
+                      <td><a th:text="${stream.resultPath}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}"></a></td>
+                      <td>
+                        <a th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}+'/delete'}" class="btn btn-sm"><i class="bi bi-trash"></i></a></td>
+                    </tr>
+
+                    </a>
+                    </tbody>
+
+                  </table>
+
+                </form>
+
+              </div>
+              <div class="tab-pane fade" id="bordered-history" role="tabpanel" aria-labelledby="profile-history">
+
+                <table class="table datatable">
+                  <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Source</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Last Sync</th>
+                    <th scope="col">Enabled</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <!--                    <tr>-->
+                  <!--                      <td></td>-->
+                  <!--                      <td></td>-->
+                  <!--                      <td></td>-->
+                  <!--                      <td></td>-->
+                  <!--                      <td></td>-->
+                  <!--                      <td></td>-->
+                  <!--                      <td></td>-->
+                  <!--                    </tr>-->
+                  </tbody>
+                </table>
+
+              </div>
+              <div class="tab-pane fade" id="bordered-mapping" role="tabpanel" aria-labelledby="mapping-tab">
+                Saepe animi et soluta ad odit soluta sunt. Nihil quos omnis animi debitis cumque. Accusantium quibusdam perspiciatis qui qui omnis magnam. Officiis accusamus impedit molestias nostrum veniam. Qui amet ipsum iure. Dignissimos fuga tempore dolor.
+              </div>
+            </div><!-- End Bordered Tabs -->
+          </div>
+
+
+
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main><!-- End #main -->
+
+<!-- ======= Footer ======= -->
+<footer id="footer" th:replace="layout/footer"></footer>
+
+</body>
+
+</html>
