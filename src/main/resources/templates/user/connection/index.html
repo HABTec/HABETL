@@ -47,6 +47,7 @@
                   <th scope="col">Destination</th>
                   <th scope="col">Last Sync</th>
                   <th scope="col">Enabled</th>
+                  <th scope="col">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -57,12 +58,11 @@
                   <td th:text="${connection.destination.name}">28</td>
                   <td th:text="${connection.lastSync}">28</td>
                   <td th:text="${connection.enabled}">28</td>
+                  <td><a th:href="@{'/user/connection/'+${connection.id}}" class="btn btn-sm">Show</a></td>
                 </tr>
                 </tbody>
               </table>
               <!-- End Table with stripped rows -->
-
-
             </div>
           </div>
 
