@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://thymeleaf.com" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+  <title>Stream  - HAB-ETL</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+  <link th:replace="layout/admin-head">
+</head>
+
+<body>
+<header id="header" th:replace="layout/header"></header>
+<aside id="sidebar" th:replace="layout/sidebar"></aside>
+<main id="main" class="main">
+
+  <div class="pagetitle">
+    <h1>Connections</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/user">Home</a></li>
+        <li class="breadcrumb-item"><a th:href="@{'/user/connection/'+${stream.connection.id}}">Connections</a></li>
+        <li class="breadcrumb-item">Stream</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Stream</h5>
+
+            <!-- General Form Elements -->
+            <form th:action="@{'/user/connection/'+${stream.connection.id}+'/stream/'+${stream.id}+'/update'}" method="post">
+              <div class="row">
+                <div class="row mb-3 col-6">
+                  <div>
+                    <div class="form-floating mb-3">
+                      <input name="name" type="text" th:value="${stream.name}" class="form-control" id="floatingInput" placeholder="name of the stream">
+                      <input type="hidden" name="connection" th:value="${stream.connection.id}">
+                      <input type="hidden" name="id" th:value="${stream.id}">
+                      <label for="floatingInput">Stream name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <input name="targetName" th:value="${stream.targetName}" type="text" class="form-control" id="floatingTargetName" placeholder="users">
+                      <label for="floatingTargetName">Target table name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <input name="resourceURI" th:value="${stream.resourceURI}" type="text" class="form-control" id="floatingResourceURI" placeholder="/users">
+                      <label for="floatingResourceURI">Resource URI</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <input name="resultPath" th:value="${stream.resultPath}" type="text" class="form-control" id="floatingResultPath" placeholder="/result/users">
+                      <label for="floatingResultPath">Result Path</label>
+                    </div>
+                    <div class="text-left">
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                      <button type="reset" class="btn btn-secondary">Reset</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6" style="overflow-y:scroll; max-height:400px">
+                  <code th:text="${stream.resultObject}">
+                  </code>
+                </div>
+              </div>
+            </form>
+
+            <form th:action="@{'/user/connection/'+${stream.connection.id}+'/stream/'+${stream.id}+'/columns'}" method="post">
+              <table class="table table-hover">
+                <thead>
+                <tr>
+                  <th> </th>
+                  <th>Name</th>
+                  <th>Target Name</th>
+                  <th>Data Type</th>
+                  <th>Path</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="column:${stream.tableColumns}">
+                  <td>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" name="disabled[]" th:value="${column.id}" type="checkbox" th:checked="${!column.disabled}" />
+                      <input type="hidden" name="id[]" th:value="${column.id}" />
+                      <input type="hidden" name="name[]" th:value="${column.name}" />
+                    </div>
+                  </td>
+                  <td th:text="${column.name}"></td>
+                  <td>
+                    <input class="form-control" name="targetName[]" type="text" th:value="${column.targetName}" />
+                  </td>
+                  <td>
+                    <input class="form-control" name="dataType[]" type="text" th:value="${column.dataType}" />
+                  </td>
+                  <td>
+                    <input class="form-control" name="path[]" type="text" th:value="${column.path}" />
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+              <div class="text-left">
+                <button type="submit" class="btn btn-primary">Save Columns</button>
+                <button type="reset" class="btn btn-secondary">Reset</button>
+              </div>
+            </form>
+            <!-- End General Form Elements -->
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main><!-- End #main -->
+
+<!-- ======= Footer ======= -->
+<footer id="footer" th:replace="layout/footer"></footer>
+
+</body>
+
+</html>
