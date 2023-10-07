@@ -22,4 +22,8 @@ public class ConnectionService {
     public Connection createConnection(Connection connection){
         return connectionRepository.save(connection);
     }
+
+    public Connection getById(Long id) {
+        return connectionRepository.getReferenceById(id);
+    }
 }
