@@ -85,6 +85,7 @@ public class ConnectionController {
             HttpEntity<HttpHeaders> request = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(stream.getURL(), HttpMethod.GET, request, String.class);
 
+
             if (response.getStatusCode() == HttpStatus.OK) {
 
 //            redirectAttributes.addFlashAttribute("result", response.getBody());
@@ -93,28 +94,31 @@ public class ConnectionController {
                 try {
                     JsonNode root = mapper.readTree(response.getBody());
                     JsonNode object = root.at(stream.getResultPath());
+
+                    if (object.isArray()) {
+                        redirectAttributes.addFlashAttribute("result", object.get(0).toString());
+                        object = object.get(0);
+                    }
+
                     stream.setResultObject(object.toString());
                     streamService.save(stream);
-                    if (object.isArray())
-                        redirectAttributes.addFlashAttribute("result", object.get(0).toString());
-                    else {
-                        Iterator<String> keyIterator = object.fieldNames();
-                        keyIterator.forEachRemaining(e -> {
-                            TableColumn column = new TableColumn(e, e, false, "text", "/", stream);
-                            tableColumService.save(column);
-                        });
-                        redirectAttributes.addFlashAttribute("result", object.toString());
-                        return "redirect:/user/connection/" + connectionId + "/stream/" + stream.getId();
-                    }
+
+                    Iterator<String> keyIterator = object.fieldNames();
+                    keyIterator.forEachRemaining(e -> {
+                        TableColumn column = new TableColumn(e, e, false, "text", "/", stream);
+                        tableColumService.save(column);
+                    });
+                    redirectAttributes.addFlashAttribute("result", object.toString());
                     redirectAttributes.addFlashAttribute("message", "Stream created!");
+                    return "redirect:/user/connection/" + connectionId + "/stream/" + stream.getId();
 
                 } catch (JsonProcessingException e) {
                     redirectAttributes.addFlashAttribute("message", "Invalid response message!");
                 }
 
-//        }else{
-//            redirectAttributes.addAttribute("stream",stream);
-//            redirectAttributes.addAttribute("error",response.getStatusCode());
+            }else{
+                redirectAttributes.addFlashAttribute("stream",stream);
+                redirectAttributes.addFlashAttribute("result",response.getStatusCode());
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("result", "Error encountered! " + e.toString());
