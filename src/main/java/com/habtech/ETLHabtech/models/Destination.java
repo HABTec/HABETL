@@ -25,6 +25,17 @@ public class Destination {
     @Column(name = "db")
     private String database;
 
+    @Column(name = "port")
+    private int port;
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
     @Column(name = "destination_table")
     private String table;
 
