@@ -196,7 +196,7 @@ public class ConnectionController {
             connectionService.createConnection(connection);
             jobHistoryService.save(new JobHistory(Instant.now(),true,message,connection));
         }catch (Exception e){
-            jobHistoryService.save(new JobHistory(Instant.now(),false,e.toString(),connection));
+            jobHistoryService.save(new JobHistory(Instant.now(),false,e.toString().substring(0,Math.min(e.toString().length(),255)),connection));
             redirectAttributes.addFlashAttribute("error",e.toString());
         }
         return "redirect:/user/connection/"+connection_id;

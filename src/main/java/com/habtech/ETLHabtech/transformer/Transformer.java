@@ -4,13 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habtech.ETLHabtech.models.*;
+import com.habtech.ETLHabtech.models.Connection;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.Instant;
 import java.util.Iterator;
 
 public class Transformer {
@@ -37,7 +36,7 @@ public class Transformer {
     }
     private void sync(Stream stream, java.sql.Connection con) throws Exception {
         Source source = connection.getSource();
-        Statement statement = con.createStatement();
+        PreparedStatement statement;
 
         //extract stream
 
@@ -57,28 +56,35 @@ public class Transformer {
                             object) {
                         //create insert statement
                         String persist_data = "INSERT INTO "+stream.getTargetName()+" ( ";
-
+                        String persist_data_values = "created_at ) values ( ";
                         for (TableColumn column :
                                 stream.getTableColumns()) {
                             if (!column.getDisabled()) {
                                 persist_data+=column.getName()+", ";
+                                persist_data_values+="?, ";
                             }
                         }
 
-                        persist_data+=" created_at ) values ( ";
+                        persist_data+=persist_data_values+" ? )";
 
+                        statement = con.prepareStatement(persist_data);
+                        int paramIndex = 1;
                         for (TableColumn column :
                                 stream.getTableColumns()) {
+
                             if (!column.getDisabled()) {
-                                if(column.getPath().equals("/"))
-                                    persist_data+= " '"+obj.get(column.getName()).asText()+"', ";
-                                else
-                                    persist_data+= " '"+obj.at(column.getPath()).asText()+"', ";
+                                String value;
+                                if(column.getPath().equals("/")) {
+                                    value = obj.get(column.getName()) != null ? obj.get(column.getName()).asText() : null;
+                                }else {
+                                    value = obj.at(column.getPath()) != null ? obj.at(column.getPath()).asText() : null;
+                                }
+                                statement.setString(paramIndex,value);
+                                paramIndex++;
                             }
                         }
-                        persist_data+=" CURRENT_TIMESTAMP)";
-
-                        statement.executeUpdate(persist_data);
+                        statement.setTimestamp(paramIndex, Timestamp.from(Instant.now()));
+                        statement.executeUpdate();
 
                     }
                 }else{
