@@ -22,4 +22,8 @@ public class DestinationService {
     public Destination createDestination(Destination destination){
         return destinationRepository.save(destination);
     }
+
+    public Destination getById(long destinationId) {
+        return destinationRepository.getReferenceById(destinationId);
+    }
 }

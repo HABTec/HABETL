@@ -37,6 +37,17 @@ public class Connection {
     @OneToMany(mappedBy = "connection",orphanRemoval = true,cascade = CascadeType.REMOVE)
     private List<Stream> streams;
 
+    @OneToMany(mappedBy = "connection", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<JobHistory> jobHistorylist;
+
+    public List<JobHistory> getJobHistorylist() {
+        return jobHistorylist;
+    }
+
+    public void setJobHistorylist(List<JobHistory> jobHistorylist) {
+        this.jobHistorylist = jobHistorylist;
+    }
+
     public List<Stream> getStreams() {
         return streams;
     }
@@ -116,5 +127,16 @@ public class Connection {
 
     public void setEnabled(Boolean enabled) {
         isEnabled = enabled;
+    }
+
+    @Override
+    public String toString() {
+        return "Connection{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", lastSync=" + lastSync +
+                ", isEnabled=" + isEnabled +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

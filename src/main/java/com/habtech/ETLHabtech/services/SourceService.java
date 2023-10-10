@@ -21,4 +21,8 @@ public class SourceService {
     public void createSource(Source source) {
         sourceRepository.save(source);
     }
+
+    public Source getById(long sourceId) {
+        return sourceRepository.getReferenceById(sourceId);
+    }
 }

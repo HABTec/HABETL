@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="https://thymeleaf.com" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head>
-  <title>Stream  - HAB-ETL</title>
+  <title>Table  - HAB-ETL</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
   <link th:replace="layout/admin-head">
@@ -19,7 +19,7 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/user">Home</a></li>
         <li class="breadcrumb-item"><a th:href="@{'/user/connection/'+${stream.connection.id}}">Connections</a></li>
-        <li class="breadcrumb-item">Stream</li>
+        <li class="breadcrumb-item">Table</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -30,7 +30,7 @@
 
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Stream</h5>
+            <h5 class="card-title">Table</h5>
 
             <!-- General Form Elements -->
             <form th:action="@{'/user/connection/'+${stream.connection.id}+'/stream/'+${stream.id}+'/update'}" method="post">
@@ -38,10 +38,10 @@
                 <div class="row mb-3 col-6">
                   <div>
                     <div class="form-floating mb-3">
-                      <input name="name" type="text" th:value="${stream.name}" class="form-control" id="floatingInput" placeholder="name of the stream">
+                      <input name="name" type="text" th:value="${stream.name}" class="form-control" id="floatingInput" placeholder="name of the table">
                       <input type="hidden" name="connection" th:value="${stream.connection.id}">
                       <input type="hidden" name="id" th:value="${stream.id}">
-                      <label for="floatingInput">Stream name</label>
+                      <label for="floatingInput">Table name</label>
                     </div>
                     <div class="form-floating mb-3">
                       <input name="targetName" th:value="${stream.targetName}" type="text" class="form-control" id="floatingTargetName" placeholder="users">

@@ -44,7 +44,7 @@
                 <div class="row mb-3">
                   <label class="col-sm-2 col-form-label">Source</label>
                   <div class="col-sm-10">
-                    <select required class="form-select" name="source" aria-label="Default select">
+                    <select required class="form-select" name="source_id" aria-label="Default select">
                       <option th:each="source:${sources}" th:value="${source.id}" th:text="${source.name}" selected></option>
                     </select>
                   </div>
@@ -53,7 +53,7 @@
                <div class="row mb-3">
                   <label class="col-sm-2 col-form-label">Destination</label>
                   <div class="col-sm-10">
-                    <select requried class="form-select" name="destination" aria-label="Destination select">
+                    <select requried class="form-select" name="destination_id" aria-label="Destination select">
                       <option th:each="destination:${destinations}" th:value="${destination.id}" th:text="${destination.name}" selected></option>
                     </select>
                   </div>
