@@ -3,10 +3,7 @@ package com.habtech.ETLHabtech.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.habtech.ETLHabtech.models.Connection;
-import com.habtech.ETLHabtech.models.Source;
-import com.habtech.ETLHabtech.models.Stream;
-import com.habtech.ETLHabtech.models.TableColumn;
+import com.habtech.ETLHabtech.models.*;
 import com.habtech.ETLHabtech.services.*;
 import com.habtech.ETLHabtech.transformer.Transformer;
 import jakarta.persistence.Column;
@@ -23,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -38,14 +36,17 @@ public class ConnectionController {
     private final StreamService streamService;
     private final TableColumnService tableColumService;
 
+    private final JobHistoryService jobHistoryService;
+
     private final Logger logger = LoggerFactory.getLogger(ConnectionController.class);
 
-    public ConnectionController(ConnectionService connectionService, DestinationService destinationService, SourceService sourceService, StreamService streamService, TableColumnService tableColumService) {
+    public ConnectionController(ConnectionService connectionService, DestinationService destinationService, SourceService sourceService, StreamService streamService, TableColumnService tableColumService, JobHistoryService jobHistoryService) {
         this.connectionService = connectionService;
         this.destinationService = destinationService;
         this.sourceService = sourceService;
         this.streamService = streamService;
         this.tableColumService = tableColumService;
+        this.jobHistoryService = jobHistoryService;
     }
 
     @GetMapping()
@@ -109,7 +110,7 @@ public class ConnectionController {
 
                     Iterator<String> keyIterator = object.fieldNames();
                     keyIterator.forEachRemaining(e -> {
-                        TableColumn column = new TableColumn(e, e, false, "varchar", "/", stream);
+                        TableColumn column = new TableColumn(e, e, false, "varchar(255)", "/", stream);
                         tableColumService.save(column);
                     });
                     redirectAttributes.addFlashAttribute("result", object.toString());
@@ -189,7 +190,13 @@ public class ConnectionController {
         Transformer transformer = new Transformer(connection);
         try {
             transformer.transform();
+            String message = "Sync completed successfully";
+            redirectAttributes.addFlashAttribute("message",message);
+            connection.setLastSync(Instant.now());
+            connectionService.createConnection(connection);
+            jobHistoryService.save(new JobHistory(Instant.now(),true,message,connection));
         }catch (Exception e){
+            jobHistoryService.save(new JobHistory(Instant.now(),false,e.toString(),connection));
             redirectAttributes.addFlashAttribute("error",e.toString());
         }
         return "redirect:/user/connection/"+connection_id;

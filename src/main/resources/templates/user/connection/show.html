@@ -30,17 +30,29 @@
 
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title" th:text="${connection.name}">Connection name</h5>
+
+            <div class="row">
+              <h5 class="card-title  col-lg-6 p-4" th:text="${connection.name}">Connection name</h5>
+              <div class="col-lg-6 p-4">
+                <a th:href="@{'/user/connection/'+${connection.id}+'/sync'}">
+                  <button type="button" class="btn btn-primary float-end" ><i class="bi bi-arrow-repeat me-1"></i> Sync</button>
+                </a>
+              </div>
+            </div>
+            <code th:text="${error}"></code>
+            <div th:if="${message != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="bi bi-check-circle me-1"></i>
+              <span th:text="${message}"></span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <!-- Bordered Tabs -->
             <ul class="nav nav-tabs nav-tabs-bordered" id="borderedTab" role="tablist">
               <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#bordered-home" type="button" role="tab" aria-controls="home" aria-selected="true">Stream</button>
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#bordered-home" type="button" role="tab" aria-controls="home" aria-selected="true">Table</button>
               </li>
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="profile-history" data-bs-toggle="tab" data-bs-target="#bordered-history" type="button" role="tab" aria-controls="history" aria-selected="false">Job History</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="mapping-tab" data-bs-toggle="tab" data-bs-target="#bordered-mapping" type="button" role="tab" aria-controls="mapping" aria-selected="false">Mapping</button>
               </li>
             </ul>
             <div class="tab-content pt-2" id="borderedTabContent">
@@ -51,7 +63,7 @@
                     <div class="accordion-item">
                       <h2 class="accordion-header" id="flush-headingOne">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
-                          <div class="col-form-label">Create new stream</div>
+                          <div class="col-form-label">Create new table</div>
                         </button>
                       </h2>
                       <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
@@ -61,7 +73,7 @@
                               <div class="form-floating mb-3">
                                 <input name="name" type="text" class="form-control" id="floatingInput" placeholder="name of the stream">
                                 <input type="hidden" name="connection" th:value="${connection.id}">
-                                <label for="floatingInput">Stream name</label>
+                                <label for="floatingInput">Table name</label>
                               </div>
                               <div class="form-floating mb-3">
                                 <input name="targetName" type="text" class="form-control" id="floatingTargetName" placeholder="users">
@@ -120,30 +132,21 @@
                   <thead>
                   <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Source</th>
-                    <th scope="col">Destination</th>
-                    <th scope="col">Last Sync</th>
-                    <th scope="col">Enabled</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col">Run At</th>
+                    <th scope="col">Log Message</th>
+                    <th scope="col">Is Completed Successfully</th>
                   </tr>
                   </thead>
                   <tbody>
-                  <!--                    <tr>-->
-                  <!--                      <td></td>-->
-                  <!--                      <td></td>-->
-                  <!--                      <td></td>-->
-                  <!--                      <td></td>-->
-                  <!--                      <td></td>-->
-                  <!--                      <td></td>-->
-                  <!--                      <td></td>-->
-                  <!--                    </tr>-->
+                  <tr th:each="history:${connection.getJobHistorylist()}">
+                    <td th:text="${history.id}"></td>
+                    <td th:text="${history.run_at}"></td>
+                    <td th:text="${history.log}"></td>
+                    <td th:text="${history.isSuccessfullyCompleted}"></td>
+                  </tr>
                   </tbody>
                 </table>
 
-              </div>
-              <div class="tab-pane fade" id="bordered-mapping" role="tabpanel" aria-labelledby="mapping-tab">
-                Saepe animi et soluta ad odit soluta sunt. Nihil quos omnis animi debitis cumque. Accusantium quibusdam perspiciatis qui qui omnis magnam. Officiis accusamus impedit molestias nostrum veniam. Qui amet ipsum iure. Dignissimos fuga tempore dolor.
               </div>
             </div><!-- End Bordered Tabs -->
           </div>
