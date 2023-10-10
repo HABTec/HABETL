@@ -8,6 +8,7 @@ import com.habtech.ETLHabtech.models.Source;
 import com.habtech.ETLHabtech.models.Stream;
 import com.habtech.ETLHabtech.models.TableColumn;
 import com.habtech.ETLHabtech.services.*;
+import com.habtech.ETLHabtech.transformer.Transformer;
 import jakarta.persistence.Column;
 import jakarta.transaction.Transactional;
 import jakarta.websocket.server.PathParam;
@@ -61,7 +62,12 @@ public class ConnectionController {
     }
 
     @PostMapping("store")
-    public String createConnection(@ModelAttribute("connection") Connection connection) {
+    public String createConnection(@ModelAttribute("connection") Connection connection,
+                                   @RequestParam("source_id") long source_id,
+                                   @RequestParam("destination_id") long destination_id) {
+        logger.debug(connection.toString());
+        connection.setDestination(destinationService.getById(destination_id));
+        connection.setSource(sourceService.getById(source_id));
         connectionService.createConnection(connection);
         return "redirect:/user/connection";
     }
@@ -88,8 +94,6 @@ public class ConnectionController {
 
             if (response.getStatusCode() == HttpStatus.OK) {
 
-//            redirectAttributes.addFlashAttribute("result", response.getBody());
-
                 ObjectMapper mapper = new ObjectMapper();
                 try {
                     JsonNode root = mapper.readTree(response.getBody());
@@ -105,7 +109,7 @@ public class ConnectionController {
 
                     Iterator<String> keyIterator = object.fieldNames();
                     keyIterator.forEachRemaining(e -> {
-                        TableColumn column = new TableColumn(e, e, false, "text", "/", stream);
+                        TableColumn column = new TableColumn(e, e, false, "varchar", "/", stream);
                         tableColumService.save(column);
                     });
                     redirectAttributes.addFlashAttribute("result", object.toString());
@@ -149,13 +153,6 @@ public class ConnectionController {
         return "redirect:/user/connection/" + connectionId;
     }
 
-//    @GetMapping("{connection_id}/stream/{stream_id}/columns")
-//    public String indexColumn(@PathVariable("stream_id") long id, Model model) {
-//        Stream stream = streamService.getById(id);
-//        model.addAttribute("stream", stream);
-//        return "user/column/index";
-//    }
-
     @PostMapping("/{connection_id}/stream/{stream_id}/columns")
     public String updateColumns(@PathVariable("stream_id") long stream_id,
                                 @PathVariable("connection_id") long connection_id,
@@ -170,11 +167,10 @@ public class ConnectionController {
         try {
             Stream stream = streamService.getById(stream_id);
             ArrayList<TableColumn> tableColumns = new ArrayList<>();
-            logger.debug(ids.length+" length of ids");
             for (int i = 0; i < ids.length; i++) {
                 int finalI = i;
-                logger.debug("disabled for "+i+" "+Arrays.stream(disabled).anyMatch(e->ids[finalI]==e));
-                tableColumns.add(new TableColumn(ids[i], names[i], targetNames[i], !Arrays.stream(disabled).anyMatch(e->ids[finalI]==e), dataTypes[i], paths[i], stream));
+                boolean isDisabled = disabled != null ?!Arrays.stream(disabled).anyMatch(e->ids[finalI]==e):true;
+                tableColumns.add(new TableColumn(ids[i], names[i], targetNames[i],isDisabled, dataTypes[i], paths[i], stream));
             }
             tableColumService.saveAll(tableColumns);
             redirectAttributes.addFlashAttribute("message", "Column information successfully updated");
@@ -183,6 +179,20 @@ public class ConnectionController {
             redirectAttributes.addFlashAttribute("error",e.toString());
         }
         return "redirect:/user/connection/"+connection_id+"/stream/"+stream_id;
+    }
+
+
+    @GetMapping("{connection_id}/sync")
+    public String sync(@PathVariable("connection_id") long connection_id, RedirectAttributes redirectAttributes){
+
+        Connection connection = connectionService.getById(connection_id);
+        Transformer transformer = new Transformer(connection);
+        try {
+            transformer.transform();
+        }catch (Exception e){
+            redirectAttributes.addFlashAttribute("error",e.toString());
+        }
+        return "redirect:/user/connection/"+connection_id;
     }
 
 }
