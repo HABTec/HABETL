@@ -49,37 +49,44 @@ public class Transformer {
         if (response.getStatusCode() == HttpStatus.OK) {
             ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody());
-                JsonNode object = root.at(stream.getResultPath());
+                JsonNode object;
+
+                if(stream.getResultType()==ResultType.DHIS_HEADER){
+                    object = root.get("rows");
+                }else{
+                    object = root.at(stream.getResultPath());
+                }
 
                 if (object.isArray()) {
                     for (JsonNode obj :
                             object) {
                         //create insert statement
-                        String persist_data = "INSERT INTO "+stream.getTargetName()+" ( ";
+                        String persist_data = "INSERT INTO " + stream.getTargetName() + " ( ";
                         String persist_data_values = "created_at ) values ( ";
                         for (TableColumn column :
                                 stream.getTableColumns()) {
                             if (!column.getDisabled()) {
-                                persist_data+=column.getName()+", ";
-                                persist_data_values+="?, ";
+                                persist_data += column.getTargetName() + ", ";
+                                persist_data_values += "?, ";
                             }
                         }
 
-                        persist_data+=persist_data_values+" ? )";
+                        persist_data += persist_data_values + " ? )";
 
                         statement = con.prepareStatement(persist_data);
                         int paramIndex = 1;
                         for (TableColumn column :
                                 stream.getTableColumns()) {
-
                             if (!column.getDisabled()) {
                                 String value;
-                                if(column.getPath().equals("/")) {
+                                if (stream.getResultType() == ResultType.DHIS_HEADER) {
+                                    value = obj.get(paramIndex - 1).asText();
+                                } else if (column.getPath().equals("/")) {
                                     value = obj.get(column.getName()) != null ? obj.get(column.getName()).asText() : null;
-                                }else {
+                                } else {
                                     value = obj.at(column.getPath()) != null ? obj.at(column.getPath()).asText() : null;
                                 }
-                                statement.setString(paramIndex,value);
+                                statement.setString(paramIndex, value);
                                 paramIndex++;
                             }
                         }
@@ -88,7 +95,7 @@ public class Transformer {
 
                     }
                 }else{
-                    throw new Exception("Expecting array object given!");
+                    throw new Exception("Expecting array object given! "+ object.asText());
                 }
 
         }else{
@@ -122,7 +129,7 @@ public class Transformer {
 
         for (TableColumn column :
                 stream.getTableColumns()) {
-                statement += "  "+column.getName()+" "+ column.getDataType()+", ";
+                statement += "  "+column.getTargetName()+" "+ column.getDataType()+", ";
         }
         statement+="created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP )";
         return statement;

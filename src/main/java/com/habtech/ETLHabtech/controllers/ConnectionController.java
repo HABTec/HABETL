@@ -92,33 +92,50 @@ public class ConnectionController {
             HttpEntity<HttpHeaders> request = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(stream.getURL(), HttpMethod.GET, request, String.class);
 
-
             if (response.getStatusCode() == HttpStatus.OK) {
 
                 ObjectMapper mapper = new ObjectMapper();
                 try {
                     JsonNode root = mapper.readTree(response.getBody());
-                    JsonNode object = root.at(stream.getResultPath());
+                    JsonNode object;
 
-                    if (object.isArray()) {
-                        redirectAttributes.addFlashAttribute("result", object.get(0).toString());
-                        object = object.get(0);
+                    if (root.has("headers") && root.has("rows")){
+                        stream.setResultType(ResultType.DHIS_HEADER);
+                        object = root.get("headers");
+
+                        stream.setResultObject(object.toString());
+                        streamService.save(stream);
+
+                        for (int i = 0; i < object.size(); i++) {
+                            JsonNode e = object.get(i);
+                            TableColumn column = new TableColumn(e.get("column").asText(), e.get("column").asText().toLowerCase(), false, "varchar(255)", "/", stream);
+                            tableColumService.save(column);
+                        }
+
+                    }else{
+
+                        object = root.at(stream.getResultPath());
+
+                        if (object.isArray()) {
+                            redirectAttributes.addFlashAttribute("result", object.get(0).toString());
+                            object = object.get(0);
+                        }
+
+                        stream.setResultObject(object.toString());
+                        streamService.save(stream);
+
+                        Iterator<String> keyIterator = object.fieldNames();
+                        keyIterator.forEachRemaining(e -> {
+                            TableColumn column = new TableColumn(e, e, false, "varchar(255)", "/", stream);
+                            tableColumService.save(column);
+                        });
                     }
-
-                    stream.setResultObject(object.toString());
-                    streamService.save(stream);
-
-                    Iterator<String> keyIterator = object.fieldNames();
-                    keyIterator.forEachRemaining(e -> {
-                        TableColumn column = new TableColumn(e, e, false, "varchar(255)", "/", stream);
-                        tableColumService.save(column);
-                    });
                     redirectAttributes.addFlashAttribute("result", object.toString());
                     redirectAttributes.addFlashAttribute("message", "Stream created!");
                     return "redirect:/user/connection/" + connectionId + "/stream/" + stream.getId();
 
                 } catch (JsonProcessingException e) {
-                    redirectAttributes.addFlashAttribute("message", "Invalid response message!");
+                    redirectAttributes.addFlashAttribute("error", "Invalid response message! "+e.toString());
                 }
 
             }else{
@@ -126,7 +143,7 @@ public class ConnectionController {
                 redirectAttributes.addFlashAttribute("result",response.getStatusCode());
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("result", "Error encountered! " + e.toString());
+            redirectAttributes.addFlashAttribute("error", "Error encountered! " + e.toString());
         }
         return "redirect:/user/connection/" + connectionId;
     }

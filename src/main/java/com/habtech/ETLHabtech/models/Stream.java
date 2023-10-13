@@ -43,6 +43,18 @@ public class Stream {
     @Column(name = "result_object",length = Integer.MAX_VALUE)
     private String resultObject;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ResultType resultType;
+
+    public ResultType getResultType() {
+        return resultType;
+    }
+
+    public void setResultType(ResultType resultType) {
+        this.resultType = resultType;
+    }
+
     public String getResultObject() {
         return resultObject;
     }
@@ -116,6 +128,10 @@ public class Stream {
         return connection.getSource().getHost()+resourceURI;
     }
 
+    public String getDisplayableURL(){
+        String url = getURL();
+        return url.substring(0,Math.min(50,url.length()));
+    }
     @Override
     public String toString() {
         return "Stream{" +

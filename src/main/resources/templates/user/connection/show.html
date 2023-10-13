@@ -112,7 +112,7 @@
                     <tr th:each="stream:${connection.streams}">
                       <td><a th:text="${stream.id}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}" ></a></td>
                       <td><a th:text="${stream.name}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}" ></a> </td>
-                      <td><a th:text="${stream.getURL()}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}"></a></td>
+                      <td><a th:text="${stream.getDisplayableURL()}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}"></a></td>
                       <td><a th:text="${stream.resultPath}" th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}}"></a></td>
                       <td>
                         <a th:href="@{'/user/connection/'+${connection.id}+'/stream/'+${stream.id}+'/delete'}" class="btn btn-sm"><i class="bi bi-trash"></i></a></td>
