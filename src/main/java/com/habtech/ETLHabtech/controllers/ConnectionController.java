@@ -108,7 +108,8 @@ public class ConnectionController {
 
                         for (int i = 0; i < object.size(); i++) {
                             JsonNode e = object.get(i);
-                            TableColumn column = new TableColumn(e.get("column").asText(), e.get("column").asText().toLowerCase(), false, "varchar(255)", "/", stream);
+                            String name = e.has("column")?e.get("column").asText():e.get("name").asText();
+                            TableColumn column = new TableColumn(name, name.toLowerCase(), false, "varchar(255)", "/", stream);
                             tableColumService.save(column);
                         }
 
