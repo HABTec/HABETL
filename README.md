@@ -1,6 +1,6 @@
 ## HABETL
 
-This repository contains a Spring Boot application that performs ETL (Extract, Transform, and Load) operations on data. The application can be used to extract data from a variety of sources, including databases, files, and APIs. The application can also be used to transform the data, such as cleaning it, converting it to a different format, or aggregating it. Finally, the application can be used to load the data into a variety of destinations, including databases, data warehouses, and data lakes.
+This repository contains a Spring Boot application that performs ETL (Extract, Transform, and Load) operations on data. The application can be used to extract data from a variety of sources, including databases, files, and APIs. The application can also be used to transform the data, such as cleaning it, converting it to a different format, or aggregating it. Finally, the application can be used to load the data into a variety of destinations, such as databases, data warehouses, and data lakes.
 
 The application uses a modular architecture so that each step of the ETL process can be easily reused or replaced. The application also uses a Spring Boot starter for ETL, which provides a number of features that make it easy to get started with ETL development.
 
@@ -24,5 +24,5 @@ To use the application:
 
 
 
-The application will extract the data from the source system, transform the data, and load the data into the destination system. The application will also log the progress of the ETL process.
+The application is able to extract the data from the source system, transform the data, and load the data into the destination system. The application will also log the progress of the ETL process.
 
